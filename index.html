@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua Four Water Station - Crew & Shift Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Outfit', sans-serif; }
+        .water-gradient {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0f172a 100%);
+        }
+        .droplet-glow {
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.35);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-full flex flex-col justify-between selection:bg-sky-400 selection:text-white">
+
+    <!-- Navigation Bar -->
+    <nav class="water-gradient text-white shadow-lg border-b border-sky-400/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center space-x-3.5">
+                    <div class="bg-white/10 p-2.5 rounded-2xl border border-sky-300/30 shadow-inner backdrop-blur-md flex items-center justify-center">
+                        <i class="fa-solid fa-glass-water text-2xl text-sky-300 animate-pulse"></i>
+                    </div>
+                    <div>
+                        <span class="brand-font font-black text-2xl tracking-tight text-white flex items-center gap-1">
+                            Aqua <span class="text-sky-300 font-extrabold">Four</span>
+                        </span>
+                        <p class="text-[10px] text-sky-200 tracking-widest uppercase font-semibold">Alkaline &bull; Mineral &bull; Purified</p>
+                    </div>
+                </div>
+                <!-- Role Switcher -->
+                <div class="flex items-center space-x-2 bg-slate-900/60 p-1.5 rounded-2xl border border-sky-400/30 backdrop-blur-md">
+                    <button onclick="switchRole('employee')" id="btn-employee" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 bg-sky-400 text-slate-950 shadow-md flex items-center space-x-2">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <span>Crew View</span>
+                    </button>
+                    <button onclick="switchRole('admin')" id="btn-admin" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-sky-200 hover:text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Manager Admin</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- CREW MEMBER VIEW -->
+        <div id="view-employee" class="space-y-6">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+                <div class="absolute right-0 top-0 translate-x-8 -translate-y-8 w-64 h-64 bg-sky-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="z-10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">Aqua Four Refilling Crew</span>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">Welcome back, <span id="current-employee-name" class="text-sky-600">Mateo</span></h1>
+                    <p class="text-slate-500 text-sm mt-1">Clock in for delivery or filtration duties and manage off-day applications easily.</p>
+                </div>
+                <div class="flex items-center gap-3 z-10 bg-sky-50/80 p-2.5 rounded-2xl border border-sky-200 backdrop-blur-sm">
+                    <label for="employee-select" class="text-xs font-bold text-slate-600 uppercase tracking-wider pl-1">Select Crew:</label>
+                    <select id="employee-select" onchange="changeActiveEmployee(this.value)" class="bg-white border border-sky-300 text-slate-800 text-sm rounded-xl focus:ring-sky-500 focus:border-sky-500 block p-2.5 font-semibold outline-none shadow-sm">
+                        <option value="Mateo (Delivery Driver)">Mateo (Delivery Driver)</option>
+                        <option value="Kian (Filtration Tech)">Kian (Filtration Tech)</option>
+                        <option value="Bea (Front Cashier)">Bea (Front Cashier)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Clock In / Out Card -->
+                    <div class="water-gradient text-white rounded-3xl p-6 md:p-10 shadow-xl relative overflow-hidden flex flex-col justify-between droplet-glow border border-sky-400/30">
+                        <div class="absolute right-[-20px] bottom-[-20px] opacity-10 pointer-events-none">
+                            <i class="fa-solid fa-faucet-drip text-[180px]"></i>
+                        </div>
+                        <div class="z-10">
+                            <div class="flex justify-between items-start">
+                                <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-950/60 text-sky-200 border border-sky-400/40 backdrop-blur-md">
+                                    <span id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-slate-400 mr-2"></span>
+                                    <span id="status-text">Off Shift / Not Clocked In</span>
+                                </span>
+                                <span id="live-clock" class="text-sky-200 text-sm font-mono font-bold bg-slate-950/50 px-3 py-1 rounded-xl border border-sky-400/30">--:--:--</span>
+                            </div>
+                            <div class="my-10 text-center">
+                                <h2 class="text-sky-200 text-xs uppercase tracking-widest font-bold mb-3">Live Station Shift Timer</h2>
+                                <div id="timer-display" class="text-5xl md:text-7xl font-mono font-black tracking-tight text-white drop-shadow-md">00:00:00</div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-sky-400/30 z-10">
+                            <button id="btn-clock-in" onclick="handleClockIn()" class="flex-1 bg-sky-400 hover:bg-sky-300 active:scale-[0.99] text-slate-950 font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2.5">
+                                <i class="fa-solid fa-droplet text-lg"></i>
+                                <span>Start Shift (Clock In)</span>
+                            </button>
+                            <button id="btn-clock-out" onclick="handleClockOut()" disabled class="flex-1 bg-rose-500/40 cursor-not-allowed hover:bg-rose-600 active:scale-[0.99] text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg flex items-center justify-center space-x-2.5">
+                                <i class="fa-solid fa-power-off text-lg"></i>
+                                <span>End Shift (Clock Out)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Shift Log History -->
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                                <i class="fa-solid fa-clipboard-list text-sky-600 mr-2.5 text-xl"></i> Aqua Four Shift Logs
+                            </h3>
+                            <span id="total-hours-badge" class="text-xs font-bold bg-sky-50 text-sky-700 px-3.5 py-1.5 rounded-full border border-sky-200">Total Hours: 0.0 hrs</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-100 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                        <th class="py-3.5 px-4">Date</th>
+                                        <th class="py-3.5 px-4">Clock In</th>
+                                        <th class="py-3.5 px-4">Clock Out</th>
+                                        <th class="py-3.5 px-4">Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employee-history-tbody" class="divide-y divide-slate-100 text-sm text-slate-600 font-medium">
+                                </tbody>
+                            </table>
+                            <div id="no-history-msg" class="py-12 text-center text-slate-400 text-sm hidden">
+                                <i class="fa-solid fa-bottle-water text-3xl mb-3 block text-sky-300"></i>
+                                No shift logs recorded for this crew member yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Request Form -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100">
+                        <h3 class="font-bold text-slate-800 text-lg mb-1 flex items-center">
+                            <i class="fa-solid fa-calendar-days text-sky-600 mr-2.5 text-xl"></i> File Leave Request
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-6">Submit requests directly to Station Management.</p>
+                        
+                        <form id="leave-form" onsubmit="submitLeaveRequest(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Leave Type</label>
+                                <select id="leave-type" class="w-full bg-sky-50/50 border border-sky-200 text-slate-800 text-sm rounded-2xl focus:ring-sky-500 focus:border-sky-500 p-3.5 outline-none font-medium">
+                                    <option value="Personal Day Off">Personal Day Off</option>
+                                    <option value="Medical / Sick Leave">Medical / Sick Leave</option>
+                                    <option value="Equipment Maintenance Leave">Equipment Maintenance Leave</option>
+                                    <option value="Emergency Leave">Emergency Leave</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Start Date</label>
+                                    <input type="date" id="leave-start" required class="w-full bg-sky-50/50 border border-sky-200 text-slate-800 text-sm rounded-2xl focus:ring-sky-500 focus:border-sky-500 p-3 outline-none font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">End Date</label>
+                                    <input type="date" id="leave-end" required class="w-full bg-sky-50/50 border border-sky-200 text-slate-800 text-sm rounded-2xl focus:ring-sky-500 focus:border-sky-500 p-3 outline-none font-medium">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Reason / Notes</label>
+                                <textarea id="leave-reason" rows="3" required placeholder="State reason or coverage arrangement..." class="w-full bg-sky-50/50 border border-sky-200 text-slate-800 text-sm rounded-2xl focus:ring-sky-500 focus:border-sky-500 p-3.5 outline-none resize-none font-medium"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-md shadow-sky-600/20 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Submit Leave Application</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100">
+                        <h3 class="font-bold text-slate-800 text-base mb-4 flex items-center">
+                            <i class="fa-solid fa-clock-rotate-left text-sky-600 mr-2"></i> My Leave Applications
+                        </h3>
+                        <div id="employee-leave-history" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MANAGER ADMIN VIEW -->
+        <div id="view-admin" class="space-y-6 hidden">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+                <div class="absolute right-0 top-0 translate-x-8 -translate-y-8 w-64 h-64 bg-sky-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="z-10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">Aqua Four Management Dashboard</span>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">Station Control Center</h1>
+                    <p class="text-slate-500 text-sm mt-1">Supervise active crew shifts, total station work hours, and approve leave requests.</p>
+                </div>
+                <button onclick="resetAllData()" class="z-10 text-xs text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 font-bold px-4 py-2.5 rounded-2xl transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Reset Demo Data</span>
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-sky-100 flex items-center space-x-4">
+                    <div class="bg-emerald-50 text-emerald-600 p-4 rounded-2xl border border-emerald-100 text-2xl">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Crew Clocked-In</p>
+                        <h3 id="stat-active-count" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-sky-100 flex items-center space-x-4">
+                    <div class="bg-sky-50 text-sky-600 p-4 rounded-2xl border border-sky-100 text-2xl">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Work Hours</p>
+                        <h3 id="stat-total-hours" class="text-2xl font-black text-slate-800 mt-0.5">0.0h</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-sky-100 flex items-center space-x-4">
+                    <div class="bg-amber-50 text-amber-600 p-4 rounded-2xl border border-amber-100 text-2xl">
+                        <i class="fa-solid fa-file-circle-exclamation"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Leave Requests</p>
+                        <h3 id="stat-pending-leaves" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-sky-100 flex items-center space-x-4">
+                    <div class="bg-sky-50 text-sky-600 p-4 rounded-2xl border border-sky-100 text-2xl">
+                        <i class="fa-solid fa-bottle-droplet"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Station Crew Staff</p>
+                        <h3 class="text-2xl font-black text-slate-800 mt-0.5">3</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                                <i class="fa-solid fa-inbox text-sky-600 mr-2.5 text-xl"></i> Pending Leave Queue
+                            </h3>
+                            <span id="leave-queue-badge" class="text-xs font-bold bg-amber-50 text-amber-700 px-3.5 py-1.5 rounded-full border border-amber-200">0 Pending</span>
+                        </div>
+                        <div id="admin-leave-queue" class="space-y-4"></div>
+                        <div id="no-leave-queue-msg" class="py-16 text-center text-slate-400 text-sm hidden">
+                            <i class="fa-solid fa-circle-check text-4xl mb-3 block text-emerald-500"></i>
+                            All leave applications reviewed!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-sky-100">
+                        <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center">
+                            <i class="fa-solid fa-chart-pie text-sky-600 mr-2.5 text-xl"></i> All Crew Work Logs
+                        </h3>
+                        <div class="overflow-x-auto max-h-[420px] overflow-y-auto pr-1">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead class="sticky top-0 bg-white shadow-sm">
+                                    <tr class="border-b border-slate-100 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                        <th class="py-3 px-3">Crew Name</th>
+                                        <th class="py-3 px-3">Duration</th>
+                                        <th class="py-3 px-3">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-all-logs-tbody" class="divide-y divide-slate-100 text-slate-600 font-medium"></tbody>
+                            </table>
+                            <div id="no-admin-logs-msg" class="py-12 text-center text-slate-400 text-sm hidden">
+                                No activity logs recorded yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform translate-y-28 opacity-0 transition-all duration-300 max-w-sm bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center space-x-3.5 border border-sky-500/30">
+        <div id="toast-icon" class="text-sky-400 text-xl">
+            <i class="fa-solid fa-droplet"></i>
+        </div>
+        <div class="flex-grow">
+            <p id="toast-title" class="font-bold text-xs uppercase tracking-wider text-sky-300">Station Alert</p>
+            <p id="toast-message" class="text-sm font-medium text-slate-100">Action completed successfully.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-sky-100 py-6 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 font-medium">
+            <div class="flex items-center space-x-2">
+                <span class="font-bold text-sky-600 brand-font text-base">Aqua Four</span>
+                <span>&bull; Alkaline &bull; Mineral &bull; Purified Water Station</span>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-4 text-slate-600">
+                <span><i class="fa-solid fa-location-dot text-sky-500 mr-1"></i> CHT Commercial Bldg, P. Laygo St., Brgy. Sabang, Lipa City</span>
+                <span><i class="fa-solid fa-phone text-sky-500 mr-1"></i> 0927 666 9480</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let state = {
+            activeRole: 'employee',
+            currentEmployee: 'Mateo (Delivery Driver)',
+            timeLogs: JSON.parse(localStorage.getItem('aqua_timeLogs')) || [
+                { id: '1', employee: 'Mateo (Delivery Driver)', date: '2026-10-05', clockIn: '08:00 AM', clockOut: '05:00 PM', durationSeconds: 32400 },
+                { id: '2', employee: 'Kian (Filtration Tech)', date: '2026-10-05', clockIn: '08:30 AM', clockOut: '04:30 PM', durationSeconds: 28800 }
+            ],
+            activeSessions: JSON.parse(localStorage.getItem('aqua_activeSessions')) || {},
+            leaveRequests: JSON.parse(localStorage.getItem('aqua_leaveRequests')) || [
+                { id: 'l1', employee: 'Bea (Front Cashier)', type: 'Personal Day Off', startDate: '2026-10-12', endDate: '2026-10-12', reason: 'Family medical checkup', status: 'Pending', dateSubmitted: '2026-10-06' },
+                { id: 'l2', employee: 'Mateo (Delivery Driver)', type: 'Equipment Maintenance Leave', startDate: '2026-10-15', endDate: '2026-10-16', reason: 'Delivery truck periodic PMS servicing', status: 'Pending', dateSubmitted: '2026-10-06' }
+            ]
+        };
+
+        let timerInterval = null;
+
+        function saveState() {
+            localStorage.setItem('aqua_timeLogs', JSON.stringify(state.timeLogs));
+            localStorage.setItem('aqua_activeSessions', JSON.stringify(state.activeSessions));
+            localStorage.setItem('aqua_leaveRequests', JSON.stringify(state.leaveRequests));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setInterval(updateLiveClock, 1000);
+            updateLiveClock();
+            initClockState();
+            renderAll();
+        });
+
+        function updateLiveClock() {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function switchRole(role) {
+            state.activeRole = role;
+            const btnEmp = document.getElementById('btn-employee');
+            const btnAdmin = document.getElementById('btn-admin');
+            const viewEmp = document.getElementById('view-employee');
+            const viewAdmin = document.getElementById('view-admin');
+
+            if (role === 'employee') {
+                btnEmp.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 bg-sky-400 text-slate-950 shadow-md flex items-center space-x-2";
+                btnAdmin.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-sky-200 hover:text-white flex items-center space-x-2";
+                viewEmp.classList.remove('hidden');
+                viewAdmin.classList.add('hidden');
+            } else {
+                btnAdmin.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 bg-sky-400 text-slate-950 shadow-md flex items-center space-x-2";
+                btnEmp.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-sky-200 hover:text-white flex items-center space-x-2";
+                viewAdmin.classList.remove('hidden');
+                viewEmp.classList.add('hidden');
+            }
+            renderAll();
+        }
+
+        function changeActiveEmployee(employeeName) {
+            state.currentEmployee = employeeName;
+            document.getElementById('current-employee-name').innerText = employeeName.split(' ')[0];
+            document.getElementById('employee-select').value = employeeName;
+            initClockState();
+            renderEmployeeHistory();
+            renderEmployeeLeaveHistory();
+        }
+
+        function initClockState() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            const session = state.activeSessions[state.currentEmployee];
+            const btnIn = document.getElementById('btn-clock-in');
+            const btnOut = document.getElementById('btn-clock-out');
+            const statusInd = document.getElementById('status-indicator');
+            const statusTxt = document.getElementById('status-text');
+
+            if (session) {
+                btnIn.disabled = true;
+                btnIn.className = "flex-1 bg-sky-400/40 cursor-not-allowed text-slate-950 font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center space-x-2.5";
+                
+                btnOut.disabled = false;
+                btnOut.className = "flex-1 bg-rose-500 hover:bg-rose-600 active:scale-[0.99] text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-rose-500/20 flex items-center justify-center space-x-2.5";
+
+                statusInd.className = "w-2.5 h-2.5 rounded-full bg-sky-300 animate-ping mr-2";
+                statusTxt.innerText = "Currently On Shift (Clocked In)";
+
+                const startTime = session.startTime;
+                updateTimerDisplay(startTime);
+                timerInterval = setInterval(() => updateTimerDisplay(startTime), 1000);
+            } else {
+                btnIn.disabled = false;
+                btnIn.className = "flex-1 bg-sky-400 hover:bg-sky-300 active:scale-[0.99] text-slate-950 font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-sky-400/20 flex items-center justify-center space-x-2.5";
+                
+                btnOut.disabled = true;
+                btnOut.className = "flex-1 bg-rose-500/40 cursor-not-allowed text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center space-x-2.5";
+
+                statusInd.className = "w-2.5 h-2.5 rounded-full bg-slate-400 mr-2";
+                statusTxt.innerText = "Off Shift / Not Clocked In";
+                document.getElementById('timer-display').innerText = "00:00:00";
+            }
+        }
+
+        function updateTimerDisplay(startTime) {
+            const now = Date.now();
+            const diffSeconds = Math.floor((now - startTime) / 1000);
+            
+            const hours = String(Math.floor(diffSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((diffSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(diffSeconds % 60).padStart(2, '0');
+
+            document.getElementById('timer-display').innerText = `${hours}:${minutes}:${seconds}`;
+        }
+
+        function handleClockIn() {
+            const now = Date.now();
+            state.activeSessions[state.currentEmployee] = { startTime: now };
+            saveState();
+            initClockState();
+            renderAll();
+            showToast('Shift Started', `Shift started for ${state.currentEmployee}.`, 'sky');
+        }
+
+        function handleClockOut() {
+            const session = state.activeSessions[state.currentEmployee];
+            if (!session) return;
+
+            const now = Date.now();
+            const durationSeconds = Math.floor((now - session.startTime) / 1000);
+            
+            const startDateObj = new Date(session.startTime);
+            const endDateObj = new Date(now);
+
+            const dateStr = startDateObj.toISOString().split('T')[0];
+            const clockInStr = startDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const clockOutStr = endDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newLog = {
+                id: 'log_' + Date.now(),
+                employee: state.currentEmployee,
+                date: dateStr,
+                clockIn: clockInStr,
+                clockOut: clockOutStr,
+                durationSeconds: durationSeconds
+            };
+
+            state.timeLogs.unshift(newLog);
+            delete state.activeSessions[state.currentEmployee];
+            saveState();
+
+            if (timerInterval) clearInterval(timerInterval);
+            initClockState();
+            renderAll();
+            showToast('Shift Ended', `Shift completed. Duration logged: ${formatHours(durationSeconds)}.`, 'rose');
+        }
+
+        function submitLeaveRequest(e) {
+            e.preventDefault();
+            const type = document.getElementById('leave-type').value;
+            const startDate = document.getElementById('leave-start').value;
+            const endDate = document.getElementById('leave-end').value;
+            const reason = document.getElementById('leave-reason').value;
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('Date Error', 'Start date cannot be after end date.', 'rose');
+                return;
+            }
+
+            const newRequest = {
+                id: 'leave_' + Date.now(),
+                employee: state.currentEmployee,
+                type,
+                startDate,
+                endDate,
+                reason,
+                status: 'Pending',
+                dateSubmitted: new Date().toISOString().split('T')[0]
+            };
+
+            state.leaveRequests.unshift(newRequest);
+            saveState();
+
+            document.getElementById('leave-form').reset();
+            renderAll();
+            showToast('Leave Filed', 'Leave application submitted successfully.', 'sky');
+        }
+
+        function handleLeaveAction(requestId, action) {
+            const req = state.leaveRequests.find(r => r.id === requestId);
+            if (req) {
+                req.status = action;
+                saveState();
+                renderAll();
+                showToast(`Leave ${action}`, `Request by ${req.employee} was ${action.toLowerCase()} by manager.`, action === 'Approved' ? 'emerald' : 'rose');
+            }
+        }
+
+        function renderAll() {
+            renderEmployeeHistory();
+            renderEmployeeLeaveHistory();
+            renderAdminDashboard();
+        }
+
+        function renderEmployeeHistory() {
+            const tbody = document.getElementById('employee-history-tbody');
+            const noMsg = document.getElementById('no-history-msg');
+            const logs = state.timeLogs.filter(l => l.employee === state.currentEmployee);
+
+            tbody.innerHTML = '';
+            let totalSecs = 0;
+
+            if (logs.length === 0) {
+                noMsg.classList.remove('hidden');
+            } else {
+                noMsg.classList.add('hidden');
+                logs.forEach(log => {
+                    totalSecs += log.durationSeconds;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-sky-50/50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="py-3.5 px-4 font-semibold text-slate-800">${log.date}</td>
+                        <td class="py-3.5 px-4 text-sky-700 font-semibold"><i class="fa-solid fa-arrow-right-to-bracket mr-1.5"></i>${log.clockIn}</td>
+                        <td class="py-3.5 px-4 text-rose-600 font-semibold"><i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i>${log.clockOut}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-700">${formatHours(log.durationSeconds)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const totalHoursNum = (totalSecs / 3600).toFixed(1);
+            document.getElementById('total-hours-badge').innerText = `Total Hours: ${totalHoursNum} hrs`;
+        }
+
+        function renderEmployeeLeaveHistory() {
+            const container = document.getElementById('employee-leave-history');
+            const leaves = state.leaveRequests.filter(l => l.employee === state.currentEmployee);
+
+            container.innerHTML = '';
+            if (leaves.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No leave applications submitted yet.</p>`;
+                return;
+            }
+
+            leaves.forEach(leave => {
+                let badgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+                let iconClass = "fa-hourglass-half text-amber-500";
+                if (leave.status === 'Approved') {
+                    badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                    iconClass = "fa-circle-check text-emerald-500";
+                } else if (leave.status === 'Rejected') {
+                    badgeClass = "bg-rose-50 text-rose-700 border-rose-200";
+                    iconClass = "fa-circle-xmark text-rose-500";
+                }
+
+                const div = document.createElement('div');
+                div.className = "p-4 rounded-2xl border border-sky-100 bg-sky-50/40 space-y-2 text-xs font-medium";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-900">${leave.type}</span>
+                        <span class="px-3 py-1 rounded-full font-bold border ${badgeClass} flex items-center space-x-1.5">
+                            <i class="fa-solid ${iconClass}"></i>
+                            <span>${leave.status}</span>
+                        </span>
+                    </div>
+                    <div class="text-slate-500 flex justify-between">
+                        <span><i class="fa-regular fa-calendar mr-1"></i> ${leave.startDate} to ${leave.endDate}</span>
+                        <span>Filed: ${leave.dateSubmitted}</span>
+                    </div>
+                    <p class="text-slate-700 bg-white p-2.5 rounded-xl border border-sky-100 italic">"${leave.reason}"</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderAdminDashboard() {
+            const activeCount = Object.keys(state.activeSessions).length;
+            document.getElementById('stat-active-count').innerText = activeCount;
+
+            let totalSecsAll = 0;
+            state.timeLogs.forEach(l => totalSecsAll += l.durationSeconds);
+            document.getElementById('stat-total-hours').innerText = (totalSecsAll / 3600).toFixed(1) + 'h';
+
+            const pendingLeaves = state.leaveRequests.filter(l => l.status === 'Pending');
+            document.getElementById('stat-pending-leaves').innerText = pendingLeaves.length;
+            document.getElementById('leave-queue-badge').innerText = `${pendingLeaves.length} Pending`;
+
+            const queueContainer = document.getElementById('admin-leave-queue');
+            const noQueueMsg = document.getElementById('no-leave-queue-msg');
+            queueContainer.innerHTML = '';
+
+            if (pendingLeaves.length === 0) {
+                noQueueMsg.classList.remove('hidden');
+            } else {
+                noQueueMsg.classList.add('hidden');
+                pendingLeaves.forEach(req => {
+                    const card = document.createElement('div');
+                    card.className = "p-5 rounded-2xl border border-sky-100 bg-sky-50/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
+                    card.innerHTML = `
+                        <div class="space-y-1.5">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="font-extrabold text-slate-900 text-sm">${req.employee}</span>
+                                <span class="bg-sky-100 text-sky-800 text-xs px-2.5 py-0.5 rounded-md font-bold">${req.type}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-medium">
+                                <i class="fa-regular fa-calendar mr-1"></i> ${req.startDate} &rarr; ${req.endDate} 
+                                <span class="mx-2">&bull;</span> Submitted: ${req.dateSubmitted}
+                            </p>
+                            <p class="text-xs text-slate-700 bg-white p-2.5 rounded-xl border border-sky-100 mt-1 font-medium"><strong>Reason:</strong> ${req.reason}</p>
+                        </div>
+                        <div class="flex items-center space-x-2.5 w-full md:w-auto justify-end">
+                            <button onclick="handleLeaveAction('${req.id}', 'Approved')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm flex items-center space-x-1.5">
+                                <i class="fa-solid fa-check"></i>
+                                <span>Approve</span>
+                            </button>
+                            <button onclick="handleLeaveAction('${req.id}', 'Rejected')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm flex items-center space-x-1.5">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Reject</span>
+                            </button>
+                        </div>
+                    `;
+                    queueContainer.appendChild(card);
+                });
+            }
+
+            const adminLogsTbody = document.getElementById('admin-all-logs-tbody');
+            const noAdminLogsMsg = document.getElementById('no-admin-logs-msg');
+            adminLogsTbody.innerHTML = '';
+
+            if (state.timeLogs.length === 0) {
+                noAdminLogsMsg.classList.remove('hidden');
+            } else {
+                noAdminLogsMsg.classList.add('hidden');
+                state.timeLogs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-sky-50/50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 font-bold text-slate-800">${log.employee}</td>
+                        <td class="py-3 px-3 font-extrabold text-sky-600">${formatHours(log.durationSeconds)}</td>
+                        <td class="py-3 px-3 text-slate-500 font-medium">${log.date}</td>
+                    `;
+                    adminLogsTbody.appendChild(tr);
+                });
+            }
+        }
+
+        function formatHours(totalSeconds) {
+            const hrs = (totalSeconds / 3600).toFixed(1);
+            return `${hrs} hrs`;
+        }
+
+        function showToast(title, message, theme = 'sky') {
+            const toast = document.getElementById('toast-notification');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+
+            if (theme === 'sky' || theme === 'emerald') {
+                toastIcon.className = "text-sky-300 text-xl";
+                toastIcon.innerHTML = '<i class="fa-solid fa-droplet"></i>';
+            } else {
+                toastIcon.className = "text-rose-400 text-xl";
+                toastIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            }
+
+            toast.classList.remove('translate-y-28', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-28', 'opacity-0');
+            }, 3500);
+        }
+
+        function resetAllData() {
+            localStorage.removeItem('aqua_timeLogs');
+            localStorage.removeItem('aqua_activeSessions');
+            localStorage.removeItem('aqua_leaveRequests');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
